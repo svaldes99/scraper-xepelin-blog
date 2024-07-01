@@ -21,6 +21,7 @@
     "puppeteer": "^13.0.1",
     "request": "^2.88.2",
     "chromedriver": "^91.0.0",
-    "selenium-webdriver": "^4.0.0"
+    "selenium-webdriver": "^4.0.0",
+    "pygsheets": "^2.0.6"
   }
 }
