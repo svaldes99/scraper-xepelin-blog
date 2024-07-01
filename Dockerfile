@@ -1,7 +1,7 @@
-# Usa una imagen base oficial de Node.js
-FROM node:14-slim
+# Usa una imagen base oficial de Python
+FROM python:3.9-slim
 
-# Instala dependencias del sistema
+# Instala las dependencias del sistema necesarias
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
@@ -11,33 +11,27 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Configurar el repositorio de Google Chrome
-RUN curl -sSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+# Instala Google Chrome
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
-    && apt-get install -y google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y google-chrome-stable
 
-# Instala ChromeDriver
-RUN CHROME_DRIVER_VERSION=`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE` \
-    && wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip \
+# Instala chromedriver
+RUN CHROMEDRIVER_VERSION=`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE` \
+    && wget -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip \
     && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
-    && rm /tmp/chromedriver.zip
-
-# Establece la variable de entorno para ChromeDriver
-ENV PATH /usr/local/bin:$PATH
+    && rm /tmp/chromedriver.zip \
+    && chmod +x /usr/local/bin/chromedriver
 
 # Establece el directorio de trabajo
 WORKDIR /app
 
-# Copia los archivos de la aplicación
+# Copia los archivos necesarios
 COPY . .
 
-# Instala las dependencias de Node.js
-RUN npm install
+# Instala las dependencias de Python
+RUN pip install -r requirements.txt
 
-# Exponer el puerto que la aplicación usará
-EXPOSE 3000
-
-# Comando para ejecutar tu aplicación
+# Ejecuta la aplicación
 CMD ["node", "server.js"]
